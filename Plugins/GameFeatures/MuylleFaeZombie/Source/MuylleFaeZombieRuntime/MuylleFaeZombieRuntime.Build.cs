@@ -11,6 +11,7 @@ public class MuylleFaeZombieRuntime : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
+				nameof(GameAI_Zombie),
 			}
 			);
 				
@@ -18,6 +19,7 @@ public class MuylleFaeZombieRuntime : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
+				nameof(GameAI_Zombie),
 			}
 			);
 			
@@ -25,7 +27,7 @@ public class MuylleFaeZombieRuntime : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core", "GameAI_Zombie",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

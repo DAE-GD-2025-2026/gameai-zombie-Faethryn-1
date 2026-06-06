@@ -10,6 +10,8 @@
 #include "Perception/AISense_Damage.h"
 #include "StudentPerceptorMuylleFae.generated.h"
 
+class ABaseItem;
+class AHouse;
 class ASurvivorPawn;
 class UInventoryComponent;
 class UHealthComponent;
@@ -30,6 +32,8 @@ public:
 	
 	virtual void BeginPlay() override;
 	
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	UPROPERTY(EditAnywhere, Category="Perception")
 	ASurvivorPawn* MySurvivorPawn;
 	
@@ -43,15 +47,19 @@ public:
 	UStaminaComponent* MyStamina;
 	
 	UPROPERTY(EditAnywhere, Category="Perception")
-	float ZombieRunRange{500.0f};
+	float ZombieRunRange{5000.0f};
 	
-	TSet<ABaseZombie*> SeenZombies;
+	TArray<ABaseZombie*> SeenZombies;
 	
-	TSet<AFood*> SeenFoods;
+	TArray<AFood*> SeenFoods;
 	
-	TSet<AMedkit*> SeenMedkits;
+	TArray<AMedkit*> SeenMedkits;
 	
-	TSet<AWeapon*> SeenWeapons;
+	TArray<AWeapon*> SeenWeapons;
+	
+	TArray<AHouse*> SeenHouses;
+	
+	TArray<AHouse*> CheckedHouses;
 	
 	UFUNCTION()
 	virtual void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
@@ -60,4 +68,33 @@ public:
 	
 	void SurvivorSawZombieInRange(ABaseZombie* zombie);
 	
+	void SawFood(AFood* food);
+	
+	void SawMedkit(AMedkit* medkit);
+	
+	void SawWeapon(AWeapon* weapon);
+	
+	void SawHouse(AHouse* house);
+	
+	bool HasWeapon();
+	
+	AWeapon* GetWeapon();
+	
+	bool UseWeapon();
+	
+	const int weaponSlot{4};
+	
+	void GrabItem(ABaseItem* item);
+	
+	void HouseChecked();
+	
+	void KilledEnemy(ABaseZombie* zombie);
+	
+	bool HasInventorySpace();
+	
+	UFUNCTION(BlueprintCallable)
+	float GetStamina();
+	
+	UFUNCTION(BlueprintCallable)
+	float GetHealth();
 };

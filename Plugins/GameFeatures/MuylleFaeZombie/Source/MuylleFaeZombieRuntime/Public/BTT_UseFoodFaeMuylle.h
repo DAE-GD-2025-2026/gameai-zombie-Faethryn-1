@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTT_RegisterImportantItem.generated.h"
+#include "BTT_UseFoodFaeMuylle.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MUYLLEFAEZOMBIERUNTIME_API UBTT_RegisterImportantItem : public UBTTaskNode
+class MUYLLEFAEZOMBIERUNTIME_API UBTT_UseFoodFaeMuylle : public UBTTaskNode
 {
 	GENERATED_BODY()
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& root, uint8* nodeMemory) override;
+	
 };

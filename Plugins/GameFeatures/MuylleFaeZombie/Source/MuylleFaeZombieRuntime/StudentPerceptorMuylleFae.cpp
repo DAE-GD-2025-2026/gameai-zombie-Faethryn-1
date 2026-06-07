@@ -107,6 +107,7 @@ void UStudentPerceptorMuylleFae::SurvivorSawZombieInRange(ABaseZombie* zombie)
 		if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
 		{
 			myController->GetBlackboardComponent()->SetValueAsObject(FName("ZombieToRunFrom"), zombie);
+			myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 1);
 		}
 		MySurvivorPawn->StartRunning();
 	}
@@ -151,6 +152,12 @@ void UStudentPerceptorMuylleFae::SawHouse(AHouse* house)
 	if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
 	{
 		myController->GetBlackboardComponent()->SetValueAsObject(FName("HouseMiddle"), house);
+		
+		if (myController->GetBlackboardComponent()->GetValueAsEnum(FName("SurvivorMode")) == 1)
+		{
+			return;
+		}
+		myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 2);
 	}
 }
 
@@ -228,11 +235,20 @@ void UStudentPerceptorMuylleFae::GrabItem(ABaseItem* item)
 	if (auto healthKit = Cast<AMedkit>(item))
 	{
 		MyInventory->GrabItem(freeSlot, healthKit);
+		
+		if (SeenMedkits.Contains(healthKit))
+		{
+			SeenMedkits.Remove(healthKit);
+		}
 	}
 	
 	if (auto food = Cast<AFood>(item))
 	{
 		MyInventory->GrabItem(freeSlot, food);
+		if (SeenFoods.Contains(food))
+		{
+			SeenFoods.Remove(food);
+		}
 	}
 	
 	if (auto weapon = Cast<AWeapon>(item))
@@ -245,6 +261,7 @@ void UStudentPerceptorMuylleFae::GrabItem(ABaseItem* item)
 		if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
 		{
 			myController->GetBlackboardComponent()->SetValueAsObject(FName("MyWeapon"), weapon);
+			
 		}
 	}
 	
@@ -264,6 +281,13 @@ void UStudentPerceptorMuylleFae::HouseChecked()
 		if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
 		{
 			myController->GetBlackboardComponent()->SetValueAsObject(FName("HouseMiddle"), nullptr);
+			
+			if (myController->GetBlackboardComponent()->GetValueAsEnum(FName("SurvivorMode")) == 1)
+			{
+				return;
+			}
+			myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 0);
+			
 		}
 		return;
 	}
@@ -303,6 +327,13 @@ void UStudentPerceptorMuylleFae::KilledEnemy(ABaseZombie* zombie)
 		if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
 		{
 			myController->GetBlackboardComponent()->SetValueAsObject(FName("ZombieToRunFrom"), nullptr);
+			
+			if (SeenHouses.Num() > 0)
+			{
+				myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 2);
+				return;
+			}
+			myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 0);
 		}
 		
 		MySurvivorPawn->StopRunning();
@@ -330,6 +361,131 @@ bool UStudentPerceptorMuylleFae::HasInventorySpace()
 	}
 	
 	return false;
+}
+
+bool UStudentPerceptorMuylleFae::AnyGunsInMemory()
+{
+	if (SeenWeapons.Num() > 0)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+bool UStudentPerceptorMuylleFae::AnyMedkitsInMemory()
+{
+	if (SeenMedkits.Num() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool UStudentPerceptorMuylleFae::AnyFoodInMemory()
+{
+	if (SeenFoods.Num() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool UStudentPerceptorMuylleFae::AnyFoodInInventory()
+{
+	bool hasFoodInInventory = false;
+	
+	for (auto item : MyInventory->GetInventory())
+	{
+		if (auto food = Cast<AFood>(item))
+		{
+			hasFoodInInventory = true;
+			return hasFoodInInventory;
+		}
+	}
+	
+	return false;
+}
+
+bool UStudentPerceptorMuylleFae::AnyMedkitInInventory()
+{
+	bool hasMedkitInInventory = false;
+	
+	for (auto item : MyInventory->GetInventory())
+	{
+		if (auto medkit = Cast<AMedkit>(item))
+		{
+			hasMedkitInInventory = true;
+			return hasMedkitInInventory;
+		}
+	}
+	
+	return false;
+}
+
+void UStudentPerceptorMuylleFae::UseMedkitInInventory()
+{
+	for (int i{0}; i < MyInventory->GetInventory().Num(); i++)
+	{
+		if (auto medkit = Cast<AMedkit>(MyInventory->GetInventory()[i]))
+		{
+			MyInventory->UseItem(i);
+			
+			if (medkit->GetValue() == 0)
+			{
+				MyInventory->RemoveItem(i);
+			}
+		}
+	}
+}
+
+void UStudentPerceptorMuylleFae::UseFoodInInventory()
+{
+	for (int i{0}; i < MyInventory->GetInventory().Num(); i++)
+	{
+		if (auto medkit = Cast<AFood>(MyInventory->GetInventory()[i]))
+		{
+			MyInventory->UseItem(i);
+			
+			if (medkit->GetValue() == 0)
+			{
+				MyInventory->RemoveItem(i);
+			}
+		}
+	}
+}
+
+void UStudentPerceptorMuylleFae::RemoveZombiesNotInRange()
+{
+	for (int i {0}; i < SeenZombies.Num(); i++)
+	{
+		if (!ZombieRangeCheck(SeenZombies[i]))
+		{
+			SeenZombies.RemoveAt(i);
+		}
+	}
+	
+	if (SeenZombies.Num() == 0)
+	{
+		if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
+		{
+			myController->GetBlackboardComponent()->SetValueAsObject(FName("ZombieToRunFrom"), nullptr);
+			
+			if (SeenHouses.Num() > 0)
+			{
+				myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 2);
+				return;
+			}
+			myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 0);
+		}
+		
+		MySurvivorPawn->StopRunning();
+		return;
+	}
+	if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
+	{
+		myController->GetBlackboardComponent()->SetValueAsObject(FName("ZombieToRunFrom"), SeenZombies[SeenZombies.Num()-1]);
+	}
 }
 
 float UStudentPerceptorMuylleFae::GetStamina()

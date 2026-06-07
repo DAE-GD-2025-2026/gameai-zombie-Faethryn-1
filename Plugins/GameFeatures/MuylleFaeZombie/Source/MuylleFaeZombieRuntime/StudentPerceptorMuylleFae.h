@@ -92,6 +92,18 @@ public:
 	
 	bool HasInventorySpace();
 	
+	bool AnyGunsInMemory();
+	bool AnyMedkitsInMemory();
+	bool AnyFoodInMemory();
+	
+	bool AnyFoodInInventory();
+	bool AnyMedkitInInventory();
+	void UseMedkitInInventory();
+	void UseFoodInInventory();
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveZombiesNotInRange();
+	
 	UFUNCTION(BlueprintCallable)
 	float GetStamina();
 	

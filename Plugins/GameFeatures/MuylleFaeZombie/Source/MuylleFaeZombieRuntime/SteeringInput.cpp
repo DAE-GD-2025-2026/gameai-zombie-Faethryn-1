@@ -1,2 +1,11 @@
-﻿#include "D:\ProjectFolders\Unreal\gameai-zombie-Faethryn-1\Intermediate\Build\Win64\x64\GameAI_ZombieEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h"
+﻿
 #include "SteeringInput.h"
+
+SteeringInput::SteeringInput(FVector2D myPosition ,FVector2D target, float deltaTime)
+	:
+DeltaTime{deltaTime},
+Target(target),
+MyPosition{myPosition}
+{
+	
+}

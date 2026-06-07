@@ -13,6 +13,7 @@
 #include "Common/InventoryComponent.h"
 #include "Common/HealthComponent.h"
 #include "Common/StaminaComponent.h"
+#include "PurgeZones/PurgeZone.h"
 #include "Village/House/House.h"
 
 UStudentPerceptorMuylleFae::UStudentPerceptorMuylleFae()
@@ -78,6 +79,11 @@ void UStudentPerceptorMuylleFae::OnPerceptionUpdated(AActor* Actor, FAIStimulus 
 	if (auto house = Cast<AHouse>(Actor))
 	{
 		SawHouse(house);
+	}
+	
+	if (auto purgeZone = Cast<APurgeZone>(Actor))
+	{
+		SawPurgezone(purgeZone);
 	}
 	
 }
@@ -158,6 +164,18 @@ void UStudentPerceptorMuylleFae::SawHouse(AHouse* house)
 			return;
 		}
 		myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 2);
+	}
+}
+
+void UStudentPerceptorMuylleFae::SawPurgezone(APurgeZone* zone)
+{
+	if (auto myController = Cast<ASurvivorAIController>(MySurvivorPawn->GetController()))
+	{
+		myController->GetBlackboardComponent()->SetValueAsEnum(FName("SurvivorMode"), 3);
+		
+		FName purgeZoneKey{"PurgeZoneToRunFrom"};
+		
+		myController->GetBlackboardComponent()->SetValueAsObject(purgeZoneKey, zone);
 	}
 }
 

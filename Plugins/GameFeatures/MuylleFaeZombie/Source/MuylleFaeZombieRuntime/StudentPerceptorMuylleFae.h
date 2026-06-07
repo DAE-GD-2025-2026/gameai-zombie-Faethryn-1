@@ -10,6 +10,7 @@
 #include "Perception/AISense_Damage.h"
 #include "StudentPerceptorMuylleFae.generated.h"
 
+class APurgeZone;
 class ABaseItem;
 class AHouse;
 class ASurvivorPawn;
@@ -75,6 +76,8 @@ public:
 	void SawWeapon(AWeapon* weapon);
 	
 	void SawHouse(AHouse* house);
+	
+	void SawPurgezone(APurgeZone* zone);
 	
 	bool HasWeapon();
 	
